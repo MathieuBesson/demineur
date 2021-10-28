@@ -1,0 +1,29 @@
+$width : 50; 
+
+button {
+  display: inline-block;
+  height: $width + px;
+  width: $width + px;
+  border: solid 2px black;
+  margin: 0 !important;
+  padding: 0 !important;
+  // text-align: center;
+  // font-size: 1em;
+  line-height: 0;
+  background-color: rgb(201, 201, 201);
+}
+
+#app{
+  line-height: 0;
+  // display: flex;
+  // display: flex;
+  // flex-direction: row;
+}
+
+.black{
+  background-color: black;
+}
+
+.white{
+  background-color: white;
+}

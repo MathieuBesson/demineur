@@ -1,0 +1,22 @@
+button {
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+  border: solid 2px black;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0;
+  background-color: #c9c9c9;
+}
+
+#app {
+  line-height: 0;
+}
+
+.black {
+  background-color: black;
+}
+
+.white {
+  background-color: white;
+}/*# sourceMappingURL=main.css.map */
