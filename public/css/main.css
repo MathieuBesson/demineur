@@ -2,7 +2,7 @@ button {
   display: inline-block;
   height: 50px;
   width: 50px;
-  border: solid 2px black;
+  border: solid 1px black;
   margin: 0 !important;
   padding: 0 !important;
   line-height: 0;
