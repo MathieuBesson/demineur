@@ -2,7 +2,20 @@ import { Case } from "./Case.js";
 export class Demineur {
     nbColumns = 16;
     nbLines = 16;
-    nbBombes = 20;
+    nbBombes = 25;
+    //   \ | /
+    //  --   --
+    //   / | \
+    caseAroundRealtiveCoordinates = [
+        [-1, -1],
+        [-1, 0],
+        [-1, 1],
+        [1, 0],
+        [1, -1],
+        [1, 1],
+        [0, -1],
+        [0, 1],
+    ];
     constructor(app, resetGameBtn) {
         this.app = app;
         this.resetGameBtn = resetGameBtn;
@@ -23,15 +36,16 @@ export class Demineur {
         for (let yPosition = 0; yPosition <= this.nbLines; yPosition++) {
             for (let xPosition = 0; xPosition <= this.nbColumns; xPosition++) {
                 if (yPosition !== 0 && xPosition !== 0) {
-                    this.grid[this.formateKey(xPosition, yPosition)] = new Case(
-                        xPosition,
-                        yPosition
-                    );
                     var span = document.createElement("button");
                     span.innerHTML = "&ensp;";
                     span.dataset.id = this.formateKey(xPosition, yPosition);
                     span.addEventListener("click", (e) => this.clickOnCase(e));
                     this.app.appendChild(span);
+                    this.grid[this.formateKey(xPosition, yPosition)] = new Case(
+                        xPosition,
+                        yPosition,
+                        span
+                    );
                 } else {
                     var span = document.createElement("button");
                     span.innerHTML = yPosition === 0 ? xPosition : yPosition;
@@ -52,49 +66,29 @@ export class Demineur {
             if (this.grid[idCaseWithBombe].value !== Case.STATUS_TYPE.BOMBE) {
                 this.grid[idCaseWithBombe].value = Case.STATUS_TYPE.BOMBE;
                 nbBombes--;
-                // app.querySelector(
-                //     "[data-id='" +
-                //         this.grid[idCaseWithBombe].xPosition +
-                //         "," +
-                //         this.grid[idCaseWithBombe].yPosition +
-                //         "']"
-                // ).classList.add("black");
             }
         }
-
-        // console.table(this.grid);
     }
 
     addDigits() {
-        //   \ | /
-        //  --   --
-        //   / | \
-        const idsCasesToCheck = [
-            [-1, -1],
-            [-1, 0],
-            [-1, 1],
-            [1, 0],
-            [1, -1],
-            [1, 1],
-            [0, -1],
-            [0, 1],
-        ];
         for (const property in this.grid) {
             if (this.grid[property].value === Case.STATUS_TYPE.BOMBE) {
-                idsCasesToCheck.forEach((caseToCheck) => {
-                    const idCasesToCheck = this.formateKey(
-                        caseToCheck[0] + this.grid[property].xPosition,
-                        caseToCheck[1] + this.grid[property].yPosition
-                    );
+                this.caseAroundRealtiveCoordinates.forEach(
+                    (caseToCheck) => {
+                        const idCaseToCheck = this.formateKey(
+                            caseToCheck[0] + this.grid[property].xPosition,
+                            caseToCheck[1] + this.grid[property].yPosition
+                        );
 
-                    if (
-                        this.grid.hasOwnProperty(idCasesToCheck) &&
-                        this.grid[idCasesToCheck].value !==
-                            Case.STATUS_TYPE.BOMBE
-                    ) {
-                        this.grid[idCasesToCheck].value++;
+                        if (
+                            this.grid.hasOwnProperty(idCaseToCheck) &&
+                            this.grid[idCaseToCheck].value !==
+                                Case.STATUS_TYPE.BOMBE
+                        ) {
+                            this.grid[idCaseToCheck].value++;
+                        }
                     }
-                });
+                );
             }
         }
     }
@@ -104,21 +98,63 @@ export class Demineur {
     }
 
     clickOnCase(e) {
-        if (this.grid[e.target.dataset.id].value !== Case.STATUS_TYPE.BOMBE) {
-            e.target.classList.add("white");
-            if(this.grid[e.target.dataset.id].value !== Case.STATUS_TYPE.NEUTRE){
+        const caseClicked = this.grid[e.target.dataset.id];
+        this.revealCase(caseClicked);
+
+        if (caseClicked.value === Case.STATUS_TYPE.NEUTRE) {
+            this.revealAllAroundEmptyCase(caseClicked);
+        }
+    }
+
+    revealAllAroundEmptyCase(caseClicked) {
+
+        this.caseAroundRealtiveCoordinates.forEach((positionCaseToCheck) => {
+            const idCaseToCheck = this.formateKey(
+                positionCaseToCheck[0] + caseClicked.xPosition,
+                positionCaseToCheck[1] + caseClicked.yPosition
+            );
+
+            if (this.grid.hasOwnProperty(idCaseToCheck)) {
+                const caseToCheck = this.grid[idCaseToCheck];
+                switch (true) {
+                    case caseToCheck.value === Case.STATUS_TYPE.NEUTRE &&
+                        caseToCheck.status !== Case.STATUS_TYPE.DISCOVER:
+                        this.revealCase(caseClicked);
+                        this.revealAllAroundEmptyCase(caseToCheck);
+                        break;
+                    case caseToCheck.value !== Case.STATUS_TYPE.NEUTRE &&
+                        caseToCheck.value !== Case.STATUS_TYPE.BOMBE &&
+                        caseToCheck.status !== Case.STATUS_TYPE.DISCOVER:
+                        this.revealCase(caseToCheck);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+    }
+
+    revealCase(caseSelected) {
+        switch (caseSelected.value) {
+            case Case.STATUS_TYPE.BOMBE:
+                caseSelected.element.classList.add("black");
+                break;
+            case Case.STATUS_TYPE.NEUTRE:
+                caseSelected.element.classList.add("white");
+                break;
+            default:
+                caseSelected.element.classList.add("white");
                 app.querySelector(
                     "[data-id='" +
                         this.formateKey(
-                            this.grid[e.target.dataset.id].xPosition,
-                            this.grid[e.target.dataset.id].yPosition
+                            caseSelected.xPosition,
+                            caseSelected.yPosition
                         ) +
                         "']"
-                ).textContent = this.grid[e.target.dataset.id].value;
-            }
-        } else {
-            e.target.classList.add("black");
+                ).textContent = caseSelected.value;
+                break;
         }
+        caseSelected.status = Case.STATUS_TYPE.DISCOVER;
     }
 
     getRandomCase() {
