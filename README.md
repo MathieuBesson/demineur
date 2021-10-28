@@ -11,6 +11,8 @@
 
 ## Le Projet
 
+Version en ligne : [Démineur](https://mathieu-besson-demineur.netlify.app/)
+
 ## Contact
 
 * [Mathieu Besson](https://mathieu-besson.netlify.app/)
